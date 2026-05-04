@@ -36,15 +36,22 @@
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div class="hint">нажми на экран, чтобы начать снова</div>
+  <div class="hint" id="hint">нажми на экран, чтобы начать снова</div>
 
   <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
+    const hint = document.getElementById("hint");
 
     let w, h, cx, cy;
     let startTime = performance.now();
-    const belovedName = "Ксюша"; 
+    let mode = "animation";
+    let timerStartTime = performance.now();
+
+    const belovedName = "Ксюша";
+
+    // ВАЖНО: поставь вашу дату начала отношений в формате ГГГГ-ММ-ДД
+    const relationshipStart = new Date("2019-11-06T00:00:00");
 
     function resize() {
       w = canvas.width = window.innerWidth * devicePixelRatio;
@@ -335,9 +342,79 @@
       ctx.restore();
     }
 
+    function getTogetherText() {
+      const now = new Date();
+      let years = now.getFullYear() - relationshipStart.getFullYear();
+      let months = now.getMonth() - relationshipStart.getMonth();
+      let days = now.getDate() - relationshipStart.getDate();
+
+      if (days < 0) {
+        months--;
+        const previousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        days += previousMonth.getDate();
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      const parts = [];
+      if (years > 0) parts.push(`${years} ${wordForm(years, "год", "года", "лет")}`);
+      if (months > 0) parts.push(`${months} ${wordForm(months, "месяц", "месяца", "месяцев")}`);
+      if (days > 0 || parts.length === 0) parts.push(`${days} ${wordForm(days, "день", "дня", "дней")}`);
+
+      return parts.join(" ");
+    }
+
+    function wordForm(number, one, few, many) {
+      const mod10 = number % 10;
+      const mod100 = number % 100;
+      if (mod10 === 1 && mod100 !== 11) return one;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+      return many;
+    }
+
+    function drawTimerScreen(now) {
+      const elapsed = (now - timerStartTime) / 1000;
+      const p = easeInOut(clamp(elapsed / 1.4, 0, 1));
+      const glow = 0.5 + Math.sin(now / 700) * 0.18;
+
+      updateHearts(now);
+      updateFallingFlowers(now);
+
+      ctx.save();
+      ctx.globalAlpha = p;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.shadowColor = `rgba(180, 70, 120, ${0.25 + glow * 0.25})`;
+      ctx.shadowBlur = 28;
+
+      ctx.font = `${window.innerWidth < 520 ? 24 : 34}px Arial`;
+      ctx.fillStyle = "rgba(122, 35, 82, 0.72)";
+      ctx.fillText("мы вместе уже", cx, cy - 78);
+
+      ctx.font = `italic ${window.innerWidth < 520 ? 34 : 52}px Georgia`;
+      ctx.fillStyle = "rgba(122, 35, 82, 0.94)";
+      ctx.fillText(getTogetherText(), cx, cy - 22);
+
+      ctx.font = `${window.innerWidth < 520 ? 18 : 23}px Arial`;
+      ctx.fillStyle = "rgba(122, 35, 82, 0.68)";
+      ctx.fillText("но я бы хотел провести с тобой всю жизнь", cx, cy + 48);
+
+      ctx.restore();
+    }
+
     function animate(now) {
       const elapsed = (now - startTime) / 1000;
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      if (mode === "timer") {
+        drawTimerScreen(now);
+        requestAnimationFrame(animate);
+        return;
+      }
 
       updateHearts(now);
       updateFallingFlowers(now);
@@ -350,13 +427,30 @@
       drawSparkles(now, clamp((elapsed - 4.9) / 2, 0, 1) * (1 - vanish * 0.4));
       drawName(nameProgress);
 
+      if (elapsed > 10.2) {
+        hint.textContent = "нажми, чтобы открыть маленький секрет";
+      } else {
+        hint.textContent = "нажми на экран, чтобы начать снова";
+      }
+
       requestAnimationFrame(animate);
     }
 
     window.addEventListener("click", () => {
+      const elapsed = (performance.now() - startTime) / 1000;
+
+      if (mode === "animation" && elapsed > 10.2) {
+        mode = "timer";
+        timerStartTime = performance.now();
+        hint.textContent = "нажми ещё раз, чтобы начать сначала";
+        return;
+      }
+
+      mode = "animation";
       startTime = performance.now();
       hearts.length = 0;
       fallingFlowers.length = 0;
+      hint.textContent = "нажми на экран, чтобы начать снова";
     });
 
     requestAnimationFrame(animate);
