@@ -19,6 +19,7 @@
 
     canvas {
       display: block;
+      touch-action: manipulation;
     }
 
     .hint {
@@ -436,7 +437,9 @@
       requestAnimationFrame(animate);
     }
 
-    window.addEventListener("click", () => {
+    function handleTap(event) {
+      event.preventDefault();
+
       const elapsed = (performance.now() - startTime) / 1000;
 
       if (mode === "animation" && elapsed > 10.2) {
@@ -451,7 +454,10 @@
       hearts.length = 0;
       fallingFlowers.length = 0;
       hint.textContent = "нажми на экран, чтобы начать снова";
-    });
+    }
+
+    window.addEventListener("pointerdown", handleTap, { passive: false });
+    window.addEventListener("touchstart", handleTap, { passive: false });
 
     requestAnimationFrame(animate);
   </script>
