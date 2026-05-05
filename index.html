@@ -3,463 +3,294 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Для тебя</title>
+  <title>QR фрагмент</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@500;700;800&display=swap');
+
+    :root {
+      --ink: #332a2a;
+      --soft-ink: rgba(51, 42, 42, 0.72);
+      --paper: #fff7df;
+      --paper-2: #ffe8de;
+      --paper-3: #e8f6ff;
+      --pink: #ff9ebb;
+      --yellow: #ffe58b;
+      --blue: #bfe8ff;
+    }
+
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
+      margin: 0;
+      min-height: 100vh;
       overflow: hidden;
-      background: radial-gradient(circle at top, #fff1f6 0%, #f7dbe8 38%, #eec6d9 100%);
-      font-family: "Georgia", serif;
+      color: var(--ink);
+      font-family: "Nunito", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 50% 22%, rgba(255, 158, 187, 0.26), transparent 34%),
+        radial-gradient(circle at 22% 82%, rgba(191, 232, 255, 0.55), transparent 34%),
+        radial-gradient(circle at 85% 72%, rgba(255, 229, 139, 0.34), transparent 30%),
+        linear-gradient(145deg, #fffaf0 0%, #fff1ec 48%, #eaf7ff 100%);
     }
 
-    canvas {
-      display: block;
-      touch-action: manipulation;
-    }
-
-    .hint {
+    body::before {
+      content: "";
       position: fixed;
-      bottom: 22px;
-      width: 100%;
-      text-align: center;
-      color: rgba(90, 35, 65, 0.55);
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      letter-spacing: 0.04em;
+      inset: 22px;
+      border: 6px dashed rgba(51, 42, 42, 0.12);
+      border-radius: 42px;
       pointer-events: none;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      opacity: 0.18;
+      pointer-events: none;
+      background-image:
+        radial-gradient(rgba(51, 42, 42, 0.20) 0.7px, transparent 0.7px);
+      background-size: 9px 9px;
+      mix-blend-mode: multiply;
+    }
+
+    .doodle {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0.18;
+      color: var(--ink);
+      font-family: "Caveat", cursive;
+      font-weight: 700;
+      transform: rotate(var(--r));
+      user-select: none;
+    }
+
+    .d1 { top: 10%; left: 8%; font-size: 110px; --r: -16deg; }
+    .d2 { top: 16%; right: 10%; font-size: 78px; --r: 14deg; }
+    .d3 { bottom: 14%; left: 14%; font-size: 86px; --r: 9deg; }
+    .d4 { bottom: 10%; right: 12%; font-size: 122px; --r: -10deg; }
+
+    main {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px;
+    }
+
+    .card {
+      width: min(680px, calc(100vw - 48px));
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 46px 38px 52px;
+      border: 7px solid var(--ink);
+      border-radius: 42px;
+      background: rgba(255, 250, 239, 0.84);
+      box-shadow: 15px 15px 0 rgba(51, 42, 42, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 3px solid rgba(51, 42, 42, 0.06);
+      border-radius: 30px;
+      pointer-events: none;
+    }
+
+    .key-stage {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .click-hint {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: var(--soft-ink);
+      font-family: "Caveat", cursive;
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      transform: rotate(-1.2deg);
+      transition: transform 180ms ease, opacity 180ms ease;
+      padding: 12px 20px;
+      position: absolute;
+      bottom: 0;
+    }
+
+    .click-hint:hover {
+      transform: rotate(-1.2deg) translateY(-3px) scale(1.04);
+      opacity: 0.82;
+    }
+
+    .click-hint:active {
+      transform: rotate(-1.2deg) translateY(0) scale(0.98);
+    }
+
+    .letter-wrap {
+      width: 260px;
+      height: 260px;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transform: scale(0.92) rotate(-3deg);
+      transition: opacity 350ms ease, transform 700ms cubic-bezier(.2, .9, .22, 1.25);
+      position: absolute;
+      top: 34px;
+    }
+
+    .letter-wrap.show {
+      opacity: 1;
+      transform: scale(1) rotate(-3deg);
+    }
+
+    .letter-bg {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      background: rgba(255, 158, 187, 0.22);
+      border-radius: 53% 47% 50% 50%;
+      filter: blur(2px);
+      transform: rotate(7deg);
+    }
+
+    svg {
+      width: 210px;
+      height: 210px;
+      overflow: visible;
+      position: relative;
+      z-index: 1;
+    }
+
+    .draw-letter {
+      fill: none;
+      stroke: var(--ink);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(6px 6px 0 rgba(51, 42, 42, 0.12));
+      stroke-dasharray: 620;
+      stroke-dashoffset: 620;
+    }
+
+    .show .draw-letter {
+      animation: draw 2.2s cubic-bezier(.65, 0, .25, 1) forwards;
+    }
+
+    @keyframes draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .tiny-note {
+      position: absolute;
+      left: 26px;
+      top: 22px;
+      font-family: "Caveat", cursive;
+      font-size: 25px;
+      opacity: 0.54;
+      transform: rotate(-4deg);
+    }
+
+    .copy-chip {
+      opacity: 0;
+      pointer-events: none;
+      margin-top: 18px;
+      font-family: "Caveat", cursive;
+      font-weight: 700;
+      font-size: 26px;
+      color: rgba(51, 42, 42, 0.70);
+      transition: opacity 350ms ease 2.1s;
+      transform: rotate(1deg);
+    }
+
+    .copy-chip.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 560px) {
+      body::before {
+        inset: 12px;
+        border-width: 4px;
+        border-radius: 28px;
+      }
+
+      .card {
+        min-height: 390px;
+        border-width: 5px;
+        border-radius: 34px;
+        padding: 36px 24px 44px;
+      }
+
+      .letter-wrap {
+        top: 30px;
+      }
     }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
-  <div class="hint" id="hint">нажми на экран, чтобы начать снова</div>
+  <div class="doodle d1">♡</div>
+  <div class="doodle d2">☆</div>
+  <div class="doodle d3">?</div>
+  <div class="doodle d4">Ю</div>
+
+  <main>
+    <section class="card" aria-label="QR фрагмент ключа">
+      <div class="tiny-note">qr fragment</div>
+
+      <div class="key-stage">
+        <div id="letterWrap" class="letter-wrap" aria-hidden="true">
+          <div class="letter-bg"></div>
+
+          <!-- Рисованная буква Ю: плавно прорисовывается через stroke-dashoffset -->
+          <svg viewBox="0 0 220 220" role="img" aria-label="Буква Ю">
+            <path class="draw-letter"
+              d="M58 42
+                 C52 82 52 138 58 178
+                 M61 110
+                 C82 108 96 108 116 109
+                 M150 55
+                 C112 55 95 83 95 111
+                 C95 147 118 174 151 174
+                 C184 174 202 148 202 114
+                 C202 80 182 55 150 55" />
+          </svg>
+        </div>
+
+        <button id="revealBtn" class="click-hint" type="button">
+          нажми, чтобы появился ключ
+        </button>
+      </div>
+
+      <div id="copyChip" class="copy-chip">ключ: Ю</div>
+    </section>
+  </main>
 
   <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const hint = document.getElementById("hint");
-
-    let w, h, cx, cy;
-    let startTime = performance.now();
-    let mode = "animation";
-    let timerStartTime = performance.now();
-
-    const belovedName = "Ксюша";
-
-    // ВАЖНО: поставь вашу дату начала отношений в формате ГГГГ-ММ-ДД
-    const relationshipStart = new Date("2019-11-06T00:00:00");
-
-    function resize() {
-      w = canvas.width = window.innerWidth * devicePixelRatio;
-      h = canvas.height = window.innerHeight * devicePixelRatio;
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
-      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-      cx = window.innerWidth / 2;
-      cy = window.innerHeight / 2 + 35;
-    }
-
-    window.addEventListener("resize", resize);
-    resize();
-
-    const hearts = [];
-    const fallingFlowers = [];
-
-    function createHeart() {
-      hearts.push({
-        x: Math.random() * window.innerWidth,
-        y: window.innerHeight + 30,
-        size: 6 + Math.random() * 12,
-        speed: 0.35 + Math.random() * 0.9,
-        drift: -0.5 + Math.random(),
-        alpha: 0.18 + Math.random() * 0.35,
-        phase: Math.random() * Math.PI * 2
-      });
-    }
-
-    function createFallingFlower() {
-      fallingFlowers.push({
-        x: Math.random() * window.innerWidth,
-        y: -40,
-        size: 8 + Math.random() * 13,
-        speed: 0.45 + Math.random() * 0.85,
-        drift: -0.35 + Math.random() * 0.7,
-        spin: -0.012 + Math.random() * 0.024,
-        rotation: Math.random() * Math.PI * 2,
-        alpha: 0.32 + Math.random() * 0.45,
-        petals: 5 + Math.floor(Math.random() * 4),
-        tint: Math.random()
-      });
-    }
-
-    function drawHeart(x, y, size, alpha) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(size / 20, size / 20);
-      ctx.beginPath();
-      ctx.moveTo(0, 6);
-      ctx.bezierCurveTo(-18, -8, -10, -24, 0, -12);
-      ctx.bezierCurveTo(10, -24, 18, -8, 0, 6);
-      ctx.fillStyle = `rgba(190, 60, 115, ${alpha})`;
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawTinyFlower(x, y, size, alpha, petals, rotation, tint) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(rotation);
-      ctx.globalAlpha = alpha;
-
-      let petalColor;
-      if (tint < 0.33) petalColor = "rgba(255, 210, 229, 0.95)";
-      else if (tint < 0.66) petalColor = "rgba(255, 238, 190, 0.95)";
-      else petalColor = "rgba(218, 206, 255, 0.9)";
-
-      for (let i = 0; i < petals; i++) {
-        ctx.save();
-        ctx.rotate((Math.PI * 2 / petals) * i);
-        ctx.beginPath();
-        ctx.ellipse(0, -size * 0.62, size * 0.28, size * 0.56, 0, 0, Math.PI * 2);
-        ctx.fillStyle = petalColor;
-        ctx.fill();
-        ctx.restore();
-      }
-
-      ctx.beginPath();
-      ctx.arc(0, 0, size * 0.23, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(236, 168, 74, 0.95)";
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function updateHearts(time) {
-      if (Math.random() < 0.42) createHeart();
-
-      for (let i = hearts.length - 1; i >= 0; i--) {
-        const heart = hearts[i];
-        heart.y -= heart.speed;
-        heart.x += heart.drift + Math.sin(time / 900 + heart.phase) * 0.25;
-        heart.alpha *= 0.997;
-
-        drawHeart(heart.x, heart.y, heart.size, heart.alpha);
-
-        if (heart.y < -40 || heart.alpha < 0.03) {
-          hearts.splice(i, 1);
-        }
-      }
-    }
-
-    function updateFallingFlowers(time) {
-      if (Math.random() < 0.08) createFallingFlower();
-
-      for (let i = fallingFlowers.length - 1; i >= 0; i--) {
-        const flower = fallingFlowers[i];
-        flower.y += flower.speed;
-        flower.x += flower.drift + Math.sin(time / 850 + flower.rotation) * 0.28;
-        flower.rotation += flower.spin;
-        flower.alpha *= 0.999;
-
-        drawTinyFlower(
-          flower.x,
-          flower.y,
-          flower.size,
-          flower.alpha,
-          flower.petals,
-          flower.rotation,
-          flower.tint
-        );
-
-        if (flower.y > window.innerHeight + 50 || flower.alpha < 0.04) {
-          fallingFlowers.splice(i, 1);
-        }
-      }
-    }
-
-    function easeInOut(t) {
-      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    }
-
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
-    }
-
-    function drawStem(progress, alpha) {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.lineCap = "round";
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = "rgba(78, 135, 86, 0.82)";
-
-      ctx.beginPath();
-      ctx.moveTo(cx, cy + 150);
-      ctx.bezierCurveTo(cx - 8, cy + 75, cx + 12, cy + 25, cx, cy - 10);
-
-      const length = 230 * progress;
-      ctx.setLineDash([length, 999]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-    }
-
-    function drawLeaf(side, progress, alpha) {
-      ctx.save();
-      ctx.globalAlpha = alpha * progress;
-      ctx.translate(cx, cy + 72);
-      ctx.scale(side, 1);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(46, -34, 82, -18, 96, 10);
-      ctx.bezierCurveTo(55, 26, 24, 20, 0, 0);
-      ctx.fillStyle = "rgba(95, 165, 111, 0.5)";
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawPeonyPetal(angle, layerRadius, petalLength, petalWidth, petalProgress, alpha, colorShift) {
-      const p = easeInOut(petalProgress);
-      ctx.save();
-      ctx.globalAlpha = alpha * p;
-      ctx.translate(cx, cy - 48);
-      ctx.rotate(angle);
-      ctx.translate(0, -layerRadius * p);
-      ctx.scale(1, p);
-
-      const gradient = ctx.createRadialGradient(0, -petalLength * 0.3, 4, 0, -petalLength * 0.4, petalLength);
-      gradient.addColorStop(0, `rgba(255, 246, 250, ${0.95 - colorShift * 0.1})`);
-      gradient.addColorStop(0.38, `rgba(247, ${145 - colorShift * 18}, ${188 - colorShift * 18}, 0.82)`);
-      gradient.addColorStop(1, `rgba(184, 65, 128, 0.28)`);
-
-      ctx.beginPath();
-      ctx.moveTo(0, 8);
-      ctx.bezierCurveTo(-petalWidth, -petalLength * 0.18, -petalWidth * 0.8, -petalLength * 0.76, 0, -petalLength);
-      ctx.bezierCurveTo(petalWidth * 0.8, -petalLength * 0.76, petalWidth, -petalLength * 0.18, 0, 8);
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.34)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawPeonyCenter(progress, alpha) {
-      ctx.save();
-      ctx.globalAlpha = alpha * progress;
-      ctx.translate(cx, cy - 48);
-
-      const centerGlow = ctx.createRadialGradient(0, 0, 2, 0, 0, 44);
-      centerGlow.addColorStop(0, "rgba(255, 231, 150, 0.85)");
-      centerGlow.addColorStop(0.42, "rgba(242, 148, 174, 0.58)");
-      centerGlow.addColorStop(1, "rgba(180, 64, 126, 0.08)");
-      ctx.fillStyle = centerGlow;
-      ctx.beginPath();
-      ctx.arc(0, 0, 34, 0, Math.PI * 2);
-      ctx.fill();
-
-      for (let i = 0; i < 28; i++) {
-        const a = i * 2.399;
-        const r = 3 + (i % 9) * 2.8;
-        ctx.beginPath();
-        ctx.arc(Math.cos(a) * r, Math.sin(a) * r * 0.8, 1.45, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(120, 70, 45, 0.33)";
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    function drawFlower(progress, vanish) {
-      const alpha = 1 - vanish;
-      drawStem(clamp(progress * 1.5, 0, 1), alpha);
-      drawLeaf(-1, clamp((progress - 0.16) * 2, 0, 1), alpha);
-      drawLeaf(1, clamp((progress - 0.28) * 2, 0, 1), alpha);
-
-      const layers = [
-        { count: 18, radius: 28, length: 92, width: 30, delay: 0.34, offset: 0.1 },
-        { count: 16, radius: 18, length: 76, width: 26, delay: 0.46, offset: 0.5 },
-        { count: 13, radius: 9, length: 58, width: 21, delay: 0.58, offset: 0.25 },
-        { count: 10, radius: 3, length: 42, width: 16, delay: 0.7, offset: 0.75 }
-      ];
-
-      layers.forEach((layer, layerIndex) => {
-        for (let i = 0; i < layer.count; i++) {
-          const angle = (Math.PI * 2 / layer.count) * i + layer.offset + layerIndex * 0.18;
-          const localProgress = clamp((progress - layer.delay - i * 0.008) * 2.8, 0, 1);
-          const wobble = Math.sin(i * 1.7 + layerIndex) * 0.09;
-          drawPeonyPetal(
-            angle + wobble,
-            layer.radius,
-            layer.length,
-            layer.width,
-            localProgress,
-            alpha,
-            layerIndex * 0.22
-          );
-        }
-      });
-
-      drawPeonyCenter(clamp((progress - 0.76) * 3, 0, 1), alpha);
-    }
-
-    function drawName(progress) {
-      const p = easeInOut(progress);
-      ctx.save();
-      ctx.globalAlpha = p;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      ctx.shadowColor = "rgba(180, 70, 120, 0.35)";
-      ctx.shadowBlur = 25;
-      ctx.font = `italic ${48 + p * 24}px Georgia`;
-      ctx.fillStyle = "rgba(122, 35, 82, 0.92)";
-      ctx.fillText(belovedName, cx, cy - 40);
-
-      ctx.font = "18px Arial";
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = "rgba(122, 35, 82, 0.55)";
-      ctx.fillText("ты — мой самый красивый цветок", cx, cy + 28);
-      ctx.restore();
-    }
-
-    function drawSparkles(time, strength) {
-      ctx.save();
-      ctx.globalAlpha = strength;
-      for (let i = 0; i < 55; i++) {
-        const a = i * 2.399;
-        const r = 20 + i * 3.4;
-        const x = cx + Math.cos(a + time / 2200) * r;
-        const y = cy - 48 + Math.sin(a + time / 2500) * r * 0.65;
-        const twinkle = 0.4 + Math.sin(time / 250 + i) * 0.4;
-        ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
-        ctx.beginPath();
-        ctx.arc(x, y, 1.2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    function getTogetherText() {
-      const now = new Date();
-      let years = now.getFullYear() - relationshipStart.getFullYear();
-      let months = now.getMonth() - relationshipStart.getMonth();
-      let days = now.getDate() - relationshipStart.getDate();
-
-      if (days < 0) {
-        months--;
-        const previousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-        days += previousMonth.getDate();
-      }
-
-      if (months < 0) {
-        years--;
-        months += 12;
-      }
-
-      const parts = [];
-      if (years > 0) parts.push(`${years} ${wordForm(years, "год", "года", "лет")}`);
-      if (months > 0) parts.push(`${months} ${wordForm(months, "месяц", "месяца", "месяцев")}`);
-      if (days > 0 || parts.length === 0) parts.push(`${days} ${wordForm(days, "день", "дня", "дней")}`);
-
-      return parts.join(" ");
-    }
-
-    function wordForm(number, one, few, many) {
-      const mod10 = number % 10;
-      const mod100 = number % 100;
-      if (mod10 === 1 && mod100 !== 11) return one;
-      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
-      return many;
-    }
-
-    function drawTimerScreen(now) {
-      const elapsed = (now - timerStartTime) / 1000;
-      const p = easeInOut(clamp(elapsed / 1.4, 0, 1));
-      const glow = 0.5 + Math.sin(now / 700) * 0.18;
-
-      updateHearts(now);
-      updateFallingFlowers(now);
-
-      ctx.save();
-      ctx.globalAlpha = p;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      ctx.shadowColor = `rgba(180, 70, 120, ${0.25 + glow * 0.25})`;
-      ctx.shadowBlur = 28;
-
-      ctx.font = `${window.innerWidth < 520 ? 24 : 34}px Arial`;
-      ctx.fillStyle = "rgba(122, 35, 82, 0.72)";
-      ctx.fillText("мы вместе уже", cx, cy - 78);
-
-      ctx.font = `italic ${window.innerWidth < 520 ? 34 : 52}px Georgia`;
-      ctx.fillStyle = "rgba(122, 35, 82, 0.94)";
-      ctx.fillText(getTogetherText(), cx, cy - 22);
-
-      ctx.font = `${window.innerWidth < 520 ? 18 : 23}px Arial`;
-      ctx.fillStyle = "rgba(122, 35, 82, 0.68)";
-      ctx.fillText("но я бы хотел провести с тобой всю жизнь", cx, cy + 48);
-
-      ctx.restore();
-    }
-
-    function animate(now) {
-      const elapsed = (now - startTime) / 1000;
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-      if (mode === "timer") {
-        drawTimerScreen(now);
-        requestAnimationFrame(animate);
-        return;
-      }
-
-      updateHearts(now);
-      updateFallingFlowers(now);
-
-      const flowerProgress = clamp(elapsed / 5.6, 0, 1);
-      const vanish = clamp((elapsed - 6.7) / 2.3, 0, 1);
-      const nameProgress = clamp((elapsed - 7.4) / 2.4, 0, 1);
-
-      drawFlower(flowerProgress, easeInOut(vanish));
-      drawSparkles(now, clamp((elapsed - 4.9) / 2, 0, 1) * (1 - vanish * 0.4));
-      drawName(nameProgress);
-
-      if (elapsed > 10.2) {
-        hint.textContent = "нажми, чтобы открыть маленький секрет";
-      } else {
-        hint.textContent = "нажми на экран, чтобы начать снова";
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    function handleTap(event) {
-      event.preventDefault();
-
-      const elapsed = (performance.now() - startTime) / 1000;
-
-      if (mode === "animation" && elapsed > 10.2) {
-        mode = "timer";
-        timerStartTime = performance.now();
-        hint.textContent = "нажми ещё раз, чтобы начать сначала";
-        return;
-      }
-
-      mode = "animation";
-      startTime = performance.now();
-      hearts.length = 0;
-      fallingFlowers.length = 0;
-      hint.textContent = "нажми на экран, чтобы начать снова";
-    }
-
-    window.addEventListener("pointerdown", handleTap, { passive: false });
-    window.addEventListener("touchstart", handleTap, { passive: false });
-
-    requestAnimationFrame(animate);
+    const revealBtn = document.getElementById('revealBtn');
+    const letterWrap = document.getElementById('letterWrap');
+    const copyChip = document.getElementById('copyChip');
+
+    revealBtn.addEventListener('click', () => {
+      revealBtn.style.opacity = '0';
+      revealBtn.style.pointerEvents = 'none';
+      letterWrap.classList.add('show');
+      copyChip.classList.add('show');
+    });
   </script>
 </body>
 </html>
